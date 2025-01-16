@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -69,7 +70,7 @@ public class MessagesGateway {
 
             return getMessagesActive(chatDocument.get().getNickname(), chatDocument.get().getNicknameDestination());
         } catch (Exception e) {
-            throw new RplMessageBusinessException("Não foi possivel arquivar mensagem", e.getCause(), this.getClass());
+            throw new RplMessageBusinessException(Optional.ofNullable(e.getMessage()).orElse("Não foi possivel arquivar mensagem"), e.getCause(), this.getClass());
         }
     }
 
@@ -109,7 +110,7 @@ public class MessagesGateway {
             return getMessagesActive(document.getNickname(), document.getNicknameDestination());
 
         } catch (Exception e) {
-            throw new RplMessageBusinessException("Não foi possivel deletar mensagem.", this.getClass());
+            throw new RplMessageBusinessException(Optional.ofNullable(e.getMessage()).orElse("Não foi possivel deletar mensagem."), this.getClass());
         }
     }
 
@@ -131,18 +132,22 @@ public class MessagesGateway {
 
     private List<ChatDocument> findMessagesOptional(String nickname, String nicknameDestination, Boolean active) {
 
-        if (Objects.isNull(active)) {
-            List<ChatDocument> messagesByNickname = chatRepository.findByNicknameAndNicknameDestination(nickname, nicknameDestination);
-            List<ChatDocument> messagesByNicknameDestination = chatRepository.findByNicknameAndNicknameDestination(nicknameDestination, nickname);
+        try {
+            if (Objects.isNull(active)) {
+                List<ChatDocument> messagesByNickname = chatRepository.findByNicknameAndNicknameDestination(nickname, nicknameDestination);
+                List<ChatDocument> messagesByNicknameDestination = chatRepository.findByNicknameAndNicknameDestination(nicknameDestination, nickname);
 
+
+                return validationHistoricMessage(messagesByNickname, messagesByNicknameDestination);
+            }
+
+            List<ChatDocument> messagesByNickname = chatRepository.findByNicknameAndNicknameDestinationAndActive(nickname, nicknameDestination, active);
+            List<ChatDocument> messagesByNicknameDestination = chatRepository.findByNicknameAndNicknameDestinationAndActive(nicknameDestination, nickname, active);
 
             return validationHistoricMessage(messagesByNickname, messagesByNicknameDestination);
+        } catch (Exception e) {
+            throw new RplMessageBusinessException("Não foi possivel retornar mensagens.", e.getCause(), this.getClass());
         }
-
-        List<ChatDocument> messagesByNickname = chatRepository.findByNicknameAndNicknameDestinationAndActive(nickname, nicknameDestination, active);
-        List<ChatDocument> messagesByNicknameDestination = chatRepository.findByNicknameAndNicknameDestinationAndActive(nicknameDestination, nickname, active);
-
-        return validationHistoricMessage(messagesByNickname, messagesByNicknameDestination);
     }
 
     private static List<ChatDocument> validationHistoricMessage(List<ChatDocument> messagesByNickname, List<ChatDocument> messagesByNicknameDestination) {

@@ -47,7 +47,7 @@ public class AccountGateway {
             document.setRegisterDate(LocalDateTime.now());
             profileRepository.save(document);
         } catch (Exception e) {
-            throw new RplMessageBusinessException("Não foi possivel criar conta.", e.getCause(), this.getClass());
+            throw new RplMessageBusinessException(Optional.ofNullable(e.getMessage()).orElse("Não foi possivel criar conta."), e.getCause(), this.getClass());
         }
     }
 
@@ -81,7 +81,7 @@ public class AccountGateway {
 
                     if (!Objects.equals(profileDocument.getNickname(), document.getNickname()) &&
                             (chatRepository.existsByNickname(document.getNickname()) || chatRepository.existsByNicknameDestination(document.getNickname()))) {
-                            throw new RplMessageBusinessException("Não é permitida a criação de conta com este nickname.", this.getClass());
+                        throw new RplMessageBusinessException("Não é permitida a criação de conta com este nickname.", this.getClass());
                     }
 
                     profileRepository.save(profileDocument);
@@ -94,7 +94,12 @@ public class AccountGateway {
     @Transactional
     public void deleteAccount(String id) {
         try {
-            profileRepository.deleteById(id);
+            profileRepository.findById(id)
+                    .ifPresent(document -> {
+                        CredentialsDocument credential = getCredential(document.getNickname());
+                        credentialsRepository.delete(credential);
+                        profileRepository.delete(document);
+                    });
         } catch (Exception e) {
             throw new RplMessageBusinessException("Não foi possivel deletar sua conta.", e.getCause(), this.getClass());
         }
@@ -113,13 +118,22 @@ public class AccountGateway {
             document.setActive(true);
             credentialsRepository.save(document);
         } catch (Exception e) {
-            throw new RplMessageBusinessException("Não foi possivel criar credencial de acesso.", e.getCause(), this.getClass());
+            throw new RplMessageBusinessException(Optional.ofNullable(e.getMessage()).orElse("Não foi possivel criar credencial de acesso."), e.getCause(), this.getClass());
         }
     }
 
     public CredentialsDocument getCredential(String nickname) {
         return credentialsRepository.findByNicknameAndActive(nickname, true)
                 .orElseThrow(() -> new RplMessageNotFoundException("Não existe credencial para este usuário.", this.getClass()));
+    }
+
+    public CredentialsDocument getCredentialWithoutThrows(String nickname) {
+        return credentialsRepository.findByNicknameAndActive(nickname, true)
+                .orElse(null);
+    }
+
+    public void deleteCredential(CredentialsDocument document) {
+        credentialsRepository.delete(document);
     }
 
     public LoginDocument setLogin(LoginDocument loginDocument) {
@@ -170,7 +184,7 @@ public class AccountGateway {
 
             loginRepository.delete(loginDocument);
         } catch (Exception e) {
-            throw new RplMessageBusinessException("Não foi possivel realizar logoff.", e.getCause(), this.getClass());
+            throw new RplMessageBusinessException(Optional.ofNullable(e.getMessage()).orElse("Não foi possivel realizar logoff."), e.getCause(), this.getClass());
         }
     }
 

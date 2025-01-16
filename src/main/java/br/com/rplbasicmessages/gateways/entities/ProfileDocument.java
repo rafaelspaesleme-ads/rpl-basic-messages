@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "doc_chat")
+@Document(collection = "doc_profile")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProfileDocument {
 

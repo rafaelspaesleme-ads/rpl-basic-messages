@@ -1,5 +1,6 @@
 package br.com.rplbasicmessages.usecases.services;
 
+import br.com.rplbasicmessages.commons.exceptions.RplMessageBusinessException;
 import br.com.rplbasicmessages.commons.exceptions.RplMessageUnauthorizedException;
 import br.com.rplbasicmessages.entrypoints.dtos.requests.LoginRequest;
 import br.com.rplbasicmessages.entrypoints.dtos.requests.ProfileRequest;
@@ -15,12 +16,14 @@ import br.com.rplbasicmessages.usecases.builders.CredentialsRequestBuilder;
 import br.com.rplbasicmessages.usecases.builders.LoginBuilder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AccountService {
@@ -39,36 +42,56 @@ public class AccountService {
 
     @Transactional
     public void createAccount(ProfileRequest request) {
-        CredentialsRequestBuilder credentialsRequestBuilder = getCredentialsRequestBuilder(request);
+        try {
+            CredentialsRequestBuilder credentialsRequestBuilder = getCredentialsRequestBuilder(request);
 
-        CredentialsDocument credentials = credentialsRequestBuilder.build();
-        gateway.createCredential(credentials);
+            CredentialsDocument credentials = credentialsRequestBuilder.build();
 
-        AccountRequestBuilder requestBuilder = getRequestBuilder(request);
-        requestBuilder.setCredentialsDocument(credentials);
+            AccountRequestBuilder requestBuilder = getRequestBuilder(request);
+            requestBuilder.setCredentialsDocument(credentials);
 
-        gateway.createAccount(requestBuilder.build());
+            gateway.createAccount(requestBuilder.build());
+            gateway.createCredential(credentials);
+        } catch (Exception e) {
+            throw new RplMessageBusinessException(e.getMessage(), e.getCause(), this.getClass());
+        }
     }
 
     @Transactional
     public LoginResponse login(LoginRequest request) {
 
-        CredentialsDocument credential = gateway.getCredential(request.getNickname());
 
-        ProfileDocument profile = gateway.getAccount(credential.getNickname());
+        try {
 
-        LoginBuilder loginBuilder = this.getLoginBuilder(request);
+            validationLogin(request);
 
-        loginBuilder.setTokenPublic(this.tokenPublic);
-        loginBuilder.setCredential(credential);
-        loginBuilder.setProfile(profile);
+            CredentialsDocument credential = gateway.getCredential(request.getNickname());
 
-        LoginDocument loginDocument = gateway.setLogin(loginBuilder.getLogin());
+            ProfileDocument profile = gateway.getAccount(credential.getNickname());
 
-        loginBuilder.setLoginDocument(loginDocument);
+            LoginBuilder loginBuilder = this.getLoginBuilder(request);
 
-        return loginBuilder.build();
+            loginBuilder.setTokenPublic(this.tokenPublic);
+            loginBuilder.setCredential(credential);
+            loginBuilder.setProfile(profile);
 
+            LoginDocument loginDocument = gateway.setLogin(loginBuilder.getLogin());
+
+            loginBuilder.setLoginDocument(loginDocument);
+
+            return loginBuilder.build();
+        } catch (Exception e) {
+            throw new RplMessageBusinessException(e.getMessage(), e.getCause(), this.getClass());
+        }
+
+    }
+
+    private void validationLogin(LoginRequest request) {
+        try {
+            setLogoff(request.getNickname());
+        } catch (Exception e) {
+            log.warn(String.format("[%s]::[Em tentativa de deslogar outros logins]", e.getMessage()));
+        }
     }
 
     public String getTokenLogin(String nickname) {
@@ -96,13 +119,17 @@ public class AccountService {
 
     @Transactional
     public void editAccount(ProfileRequest request) {
-        AccountRequestBuilder requestBuilder = getRequestBuilder(request);
+        try {
+            AccountRequestBuilder requestBuilder = getRequestBuilder(request);
 
-        CredentialsDocument credential = gateway.getCredential(request.getNickname());
+            CredentialsDocument credential = gateway.getCredential(request.getNickname());
 
-        requestBuilder.setCredentialsDocument(credential);
+            requestBuilder.setCredentialsDocument(credential);
 
-        gateway.editAccount(requestBuilder.build());
+            gateway.editAccount(requestBuilder.build());
+        } catch (Exception e) {
+            throw new RplMessageBusinessException(e.getMessage(), e.getCause(), this.getClass());
+        }
     }
 
     @Transactional
