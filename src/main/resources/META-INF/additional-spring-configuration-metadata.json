@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "property.security.tokenPublic",
+      "type": "java.lang.String",
+      "description": "Description for property.security.tokenPublic."
+    },
+    {
+      "name": "property.security.timelogoff",
+      "type": "java.lang.String",
+      "description": "Description for property.security.timelogoff."
+    }
+  ] }

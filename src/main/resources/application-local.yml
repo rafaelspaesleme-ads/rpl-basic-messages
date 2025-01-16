@@ -1,0 +1,18 @@
+server:
+  port: 8585
+
+spring:
+  data:
+    mongodb:
+      #      host: localhost
+      host: rplcloud.ddns.net
+      port: 27000
+      username: usr_msg_123
+      password: pss_msg_123
+      database: db_basic_message
+      authentication-database: admin
+
+property:
+  security:
+    tokenPublic: 'EDEBC15740BEA7351AE7B6C4EAE5E863'
+    timelogoff: 60

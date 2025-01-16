@@ -1,0 +1,10 @@
+server:
+  servlet:
+    context-path: /rpl-basic-messages
+
+spring:
+  application:
+    name: rpl-basic-messages
+    version: 1.0.0
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
