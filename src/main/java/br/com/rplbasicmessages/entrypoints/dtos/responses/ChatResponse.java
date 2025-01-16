@@ -36,4 +36,8 @@ public class ChatResponse {
 
     private Boolean active;
 
+    private Boolean input;
+
+    private Boolean output;
+
 }

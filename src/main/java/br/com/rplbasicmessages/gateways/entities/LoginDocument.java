@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
@@ -18,7 +19,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Document(collection = "doc_login")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class LoginDocument {
+public class LoginDocument implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @NotNull(message = "Id não pode ser nulo.")

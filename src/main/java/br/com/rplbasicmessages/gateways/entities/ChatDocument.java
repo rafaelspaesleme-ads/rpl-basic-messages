@@ -49,4 +49,8 @@ public class ChatDocument {
     @NotNull(message = "Status não pode ser nulo.")
     private Boolean active;
 
+    private Boolean input;
+
+    private Boolean output;
+
 }

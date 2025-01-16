@@ -97,6 +97,11 @@ public class AccountService {
     @Transactional
     public void editAccount(ProfileRequest request) {
         AccountRequestBuilder requestBuilder = getRequestBuilder(request);
+
+        CredentialsDocument credential = gateway.getCredential(request.getNickname());
+
+        requestBuilder.setCredentialsDocument(credential);
+
         gateway.editAccount(requestBuilder.build());
     }
 

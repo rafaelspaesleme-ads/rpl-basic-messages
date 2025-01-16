@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +29,8 @@ public class MessagesGateway {
     public List<ChatDocument> send(ChatDocument document) {
         try {
             document.setView(false);
+            document.setFixed(false);
+            document.setEdited(false);
             document.setActive(true);
             document.setDatetimeSendMessage(LocalDateTime.now());
             chatRepository.save(document);
@@ -123,14 +127,43 @@ public class MessagesGateway {
         return findMessagesOptional(nickname, nicknameDestination, active)
                 .stream()
                 .sorted(Comparator.comparing(ChatDocument::getFixed, Comparator.nullsLast(Comparator.reverseOrder())))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private List<ChatDocument> findMessagesOptional(String nickname, String nicknameDestination, Boolean active) {
+
         if (Objects.isNull(active)) {
-            return chatRepository.findByNicknameAndNicknameDestination(nickname, nicknameDestination);
+            List<ChatDocument> messagesByNickname = chatRepository.findByNicknameAndNicknameDestination(nickname, nicknameDestination);
+            List<ChatDocument> messagesByNicknameDestination = chatRepository.findByNicknameAndNicknameDestination(nicknameDestination, nickname);
+
+
+            return validationHistoricMessage(messagesByNickname, messagesByNicknameDestination);
         }
-        return chatRepository.findByNicknameAndNicknameDestinationAndActive(nickname, nicknameDestination, active);
+
+        List<ChatDocument> messagesByNickname = chatRepository.findByNicknameAndNicknameDestinationAndActive(nickname, nicknameDestination, active);
+        List<ChatDocument> messagesByNicknameDestination = chatRepository.findByNicknameAndNicknameDestinationAndActive(nicknameDestination, nickname, active);
+
+        return validationHistoricMessage(messagesByNickname, messagesByNicknameDestination);
+    }
+
+    private static List<ChatDocument> validationHistoricMessage(List<ChatDocument> messagesByNickname, List<ChatDocument> messagesByNicknameDestination) {
+        List<ChatDocument> historicMessages = new ArrayList<>();
+
+        messagesByNickname.forEach(document -> {
+            document.setInput(true);
+            document.setOutput(false);
+        });
+
+        messagesByNicknameDestination.forEach(document -> {
+            document.setInput(false);
+            document.setOutput(true);
+            document.setFixed(false);
+        });
+
+        historicMessages.addAll(messagesByNickname);
+        historicMessages.addAll(messagesByNicknameDestination);
+
+        return historicMessages;
     }
 
 }

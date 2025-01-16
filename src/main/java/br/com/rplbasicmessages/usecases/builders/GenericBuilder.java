@@ -24,8 +24,21 @@ public abstract class GenericBuilder<I, O> {
 
     GenericBuilder(I dto, Class<O> entityClass) {
         this.dto = dto;
+        this.entity = createEntityInstance(entityClass);
+    }
+
+    private O createEntityInstance(Class<O> entityClass) {
         try {
-            this.entity = entityClass.getDeclaredConstructor().newInstance();
+            if (List.class.isAssignableFrom(entityClass)) {
+                // Crie uma instância de ArrayList para um tipo genérico O
+                return (O) new ArrayList<>();
+            } else if (Set.class.isAssignableFrom(entityClass)) {
+                // Crie uma instância de HashSet para um tipo genérico O
+                return (O) new HashSet<>();
+            } else {
+                // Caso contrário, tenta instanciar o tipo genérico O normalmente
+                return entityClass.getDeclaredConstructor().newInstance();
+            }
         } catch (Exception e) {
             throw new RplMessageInternalServiceException("Erro ao criar instância da entidade", e, this.getClass());
         }

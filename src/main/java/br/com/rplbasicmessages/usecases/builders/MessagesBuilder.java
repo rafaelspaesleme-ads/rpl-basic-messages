@@ -56,6 +56,8 @@ public class MessagesBuilder extends GenericBuilder<ChatRequest, List<ChatRespon
                         .view(document.getView())
                         .edited(document.getEdited())
                         .active(document.getActive())
+                        .input(document.getInput())
+                        .output(document.getOutput())
                 .build()));
     }
 }
