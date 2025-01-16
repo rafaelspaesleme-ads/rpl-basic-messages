@@ -1,7 +1,7 @@
 server:
   port: ${PORT}
   servlet:
-    context-path: /rpl-basic-messages
+    context-path: /@api.name@
 
 spring:
   data:

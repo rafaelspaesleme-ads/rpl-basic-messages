@@ -1,6 +1,6 @@
 spring:
   application:
-    name: @api.name@
-    version: @api.version@
+    name: "@api.name@"
+    version: "@api.version@"
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
