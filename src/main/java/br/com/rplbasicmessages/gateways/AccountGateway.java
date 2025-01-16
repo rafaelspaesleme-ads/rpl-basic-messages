@@ -8,6 +8,7 @@ import br.com.rplbasicmessages.commons.utils.SecretUtils;
 import br.com.rplbasicmessages.gateways.entities.CredentialsDocument;
 import br.com.rplbasicmessages.gateways.entities.LoginDocument;
 import br.com.rplbasicmessages.gateways.entities.ProfileDocument;
+import br.com.rplbasicmessages.gateways.repositories.ChatRepository;
 import br.com.rplbasicmessages.gateways.repositories.CredentialsRepository;
 import br.com.rplbasicmessages.gateways.repositories.LoginRepository;
 import br.com.rplbasicmessages.gateways.repositories.ProfileRepository;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -32,9 +34,16 @@ public class AccountGateway {
 
     private final LoginRepository loginRepository;
 
+    private final ChatRepository chatRepository;
+
     @Transactional
     public void createAccount(ProfileDocument document) {
         try {
+
+            if (chatRepository.existsByNickname(document.getNickname()) || chatRepository.existsByNicknameDestination(document.getNickname())) {
+                throw new RplMessageBusinessException("Não é permitida a criação de conta com este nickname.", this.getClass());
+            }
+
             document.setRegisterDate(LocalDateTime.now());
             profileRepository.save(document);
         } catch (Exception e) {
@@ -49,6 +58,7 @@ public class AccountGateway {
 
     @Transactional
     public void editAccount(ProfileDocument document) {
+
         profileRepository.findById(document.getId())
                 .ifPresentOrElse(profileDocument -> {
 
@@ -68,6 +78,11 @@ public class AccountGateway {
                             .ifPresent(profileDocument::setActive);
 
                     profileDocument.setUpdatedDate(LocalDateTime.now());
+
+                    if (!Objects.equals(profileDocument.getNickname(), document.getNickname()) &&
+                            (chatRepository.existsByNickname(document.getNickname()) || chatRepository.existsByNicknameDestination(document.getNickname()))) {
+                            throw new RplMessageBusinessException("Não é permitida a criação de conta com este nickname.", this.getClass());
+                    }
 
                     profileRepository.save(profileDocument);
 

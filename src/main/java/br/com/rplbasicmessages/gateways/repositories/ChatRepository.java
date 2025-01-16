@@ -12,4 +12,8 @@ public interface ChatRepository extends MongoRepository<ChatDocument, String> {
 
     List<ChatDocument> findByNicknameAndNicknameDestinationAndActive(String nickname, String nicknameDestination, Boolean active);
     List<ChatDocument> findByNicknameAndNicknameDestination(String nickname, String nicknameDestination);
+
+    boolean existsByNickname(String nickname);
+
+    boolean existsByNicknameDestination(String nicknameDestination);
 }
