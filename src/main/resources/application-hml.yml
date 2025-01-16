@@ -1,5 +1,4 @@
 server:
-  port: ${PORT:9090}
   servlet:
     context-path: /@api.name@-hml
 
