@@ -1,0 +1,19 @@
+server:
+  port: ${PORT:9090}
+  servlet:
+    context-path: /rpl-basic-messages-hml
+
+spring:
+  data:
+    mongodb:
+      host: ${MONGO_HOST}
+      port: ${MONGO_PORT}
+      username: ${MONGO_USER}
+      password: ${MONGO_PASS}
+      database: ${MONGO_DB}
+      authentication-database: ${MONGO_AUTH_DB}
+
+property:
+  security:
+    tokenPublic: ${TOKEN_PUBLIC}
+    timelogoff: ${TIME_LOGOFF}

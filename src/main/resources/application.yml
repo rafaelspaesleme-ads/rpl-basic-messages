@@ -1,10 +1,6 @@
-server:
-  servlet:
-    context-path: /rpl-basic-messages
-
 spring:
   application:
-    name: rpl-basic-messages
-    version: 1.0.0
+    name: @api.name@
+    version: @api.version@
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}

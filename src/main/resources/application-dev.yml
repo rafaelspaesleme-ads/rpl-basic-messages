@@ -1,0 +1,19 @@
+server:
+  port: ${PORT:8585}
+  servlet:
+    context-path: /rpl-basic-messages-dev
+
+spring:
+  data:
+    mongodb:
+      host: ${MONGO_HOST:rplcloud.ddns.net}
+      port: ${MONGO_PORT:27000}
+      username: ${MONGO_USER:usr_msg_123}
+      password: ${MONGO_PASS:pss_msg_123}
+      database: ${MONGO_DB:db_basic_message}
+      authentication-database: ${MONGO_AUTH_DB:admin}
+
+property:
+  security:
+    tokenPublic: ${TOKEN_PUBLIC:EDEBC15740BEA7351AE7B6C4EAE5E863}
+    timelogoff: ${TIME_LOGOFF:60}

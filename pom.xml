@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>br.com</groupId>
 	<artifactId>rpl-basic-messages</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>rpl-basic-messages</name>
 	<description>rpl-basic-messages</description>
 	<url/>
@@ -27,6 +27,8 @@
 		<url/>
 	</scm>
 	<properties>
+		<api.name>${name}</api.name>
+		<api.version>${version}</api.version>
 		<java.version>17</java.version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
