@@ -92,15 +92,20 @@ public class SecretUtils {
         return new SecretKeySpec(decodedKey, ALGORITHM);
     }
 
-    public static String generateObjectHash(Object object) throws IOException, NoSuchAlgorithmException {
-        // Converte o objeto em um array de bytes
-        byte[] objectBytes = convertObjectToBytes(object);
+    public static String generateObjectHash(Object object) {
+        try {
+            // Converte o objeto em um array de bytes
+            byte[] objectBytes = convertObjectToBytes(object);
 
-        // Gera o hash SHA-256 a partir do array de bytes
-        byte[] hashBytes = generateSHA256Hash(objectBytes);
+            // Gera o hash SHA-256 a partir do array de bytes
+            byte[] hashBytes = generateSHA256Hash(objectBytes);
 
-        // Converte o hash em uma string hexadecimal
-        return bytesToHex(hashBytes);
+            // Converte o hash em uma string hexadecimal
+            return bytesToHex(hashBytes);
+
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new RplMessageInternalServiceException("Erro ao gerar token de login.", e.getCause(), SecretUtils.class);
+        }
     }
 
     private static byte[] convertObjectToBytes(Object object) throws IOException {
